@@ -10,6 +10,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -25,6 +27,7 @@ import org.junit.runner.notification.RunListener;
  */
 public class MaxHistory implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static Logger logger = Logger.getLogger("org.junit.experimental.max.MaxHistory");
 
     /**
      * Loads a {@link MaxHistory} from {@code file}, or generates a new one that
@@ -35,8 +38,10 @@ public class MaxHistory implements Serializable {
             try {
                 return readHistory(file);
             } catch (CouldNotReadCoreException e) {
-                e.printStackTrace();
-                file.delete();
+                // Add logger
+                logger.log(Level.WARNING, "Could not read history file.");
+                // Change method to deleteOnExit
+                file.deleteOnExit();
             }
         }
         return new MaxHistory(file);
@@ -77,8 +82,11 @@ public class MaxHistory implements Serializable {
     private void save() throws IOException {
         ObjectOutputStream stream = new ObjectOutputStream(new FileOutputStream(
                 fHistoryStore));
-        stream.writeObject(this);
-        stream.close();
+        try {
+            stream.writeObject(this);
+        } finally {
+            stream.close();
+        }
     }
 
     Long getFailureTimestamp(Description key) {

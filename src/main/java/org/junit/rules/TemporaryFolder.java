@@ -2,6 +2,8 @@ package org.junit.rules;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.junit.Rule;
 
@@ -31,6 +33,7 @@ import org.junit.Rule;
 public class TemporaryFolder extends ExternalResource {
     private final File parentFolder;
     private File folder;
+    private Logger logger = Logger.getLogger("org.junit.rules.TemporaryFolder");
 
     public TemporaryFolder() {
         this(null);
@@ -132,9 +135,12 @@ public class TemporaryFolder extends ExternalResource {
 
     private File createTemporaryFolderIn(File parentFolder) throws IOException {
         File createdFolder = File.createTempFile("junit", "", parentFolder);
-        createdFolder.delete();
-        createdFolder.mkdir();
-        return createdFolder;
+        if (createdFolder.delete()) {
+            if (createdFolder.mkdir()) {
+                return createdFolder;
+            }
+        }
+        return null;
     }
 
     /**
@@ -165,6 +171,8 @@ public class TemporaryFolder extends ExternalResource {
                 recursiveDelete(each);
             }
         }
-        file.delete();
+        if (!file.delete()) {
+            logger.log(Level.WARNING, "File was not deleted");
+        }
     }
 }

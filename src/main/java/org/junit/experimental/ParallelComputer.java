@@ -13,7 +13,6 @@ import org.junit.runners.model.RunnerScheduler;
 
 public class ParallelComputer extends Computer {
     private final boolean classes;
-
     private final boolean methods;
 
     public ParallelComputer(boolean classes, boolean methods) {
@@ -43,7 +42,7 @@ public class ParallelComputer extends Computer {
                         fService.shutdown();
                         fService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
                     } catch (InterruptedException e) {
-                        e.printStackTrace(System.err);
+                        Thread.currentThread().interrupt();
                     }
                 }
             });
